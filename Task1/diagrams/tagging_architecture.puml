@@ -1,0 +1,44 @@
+@startuml tagging_architecture
+!theme plain
+skinparam backgroundColor white
+skinparam defaultFontSize 10
+
+' Источники данных
+rectangle "ФАЙЛЫ\n(Excel, PDF)" as files #lightblue
+rectangle "1С СИСТЕМЫ\n(Бухгалтерия, Склад)" as onec #lightblue
+rectangle "МЕДКАРТЫ\n(Сканы, документы)" as medcards #lightblue
+
+' Система тегирования
+circle "КЛАССИФИКАТОР\nДАННЫХ" as classifier #lightgreen
+circle "ДВИЖОК\nТЕГИРОВАНИЯ" as engine #lightgreen
+
+' Хранилище
+database "ХРАНИЛИЩЕ\nТЕГОВ" as tag_storage #lightgreen
+
+' Policy Engine
+rectangle "POLICY ENGINE\n(Применение правил)" as policy #orange
+
+' Применение политик
+rectangle "КОНТРОЛЬ\nДОСТУПА" as access_control #yellow
+rectangle "ШИФРОВАНИЕ\nДАННЫХ" as encryption #yellow
+rectangle "АУДИТ\nОПЕРАЦИЙ" as audit #yellow
+
+' Потоки данных
+files --> classifier : "Анализ содержимого"
+onec --> classifier : "Анализ содержимого"
+medcards --> classifier : "Анализ содержимого"
+
+classifier --> engine : "Результат\nклассификации"
+engine --> tag_storage : "Сохранение\nтегов"
+
+tag_storage --> policy : "Теги объектов"
+policy --> access_control : "Правила доступа"
+policy --> encryption : "Правила шифрования"
+policy --> audit : "Правила аудита"
+
+' Примеры тегов
+note bottom of files : ТЕГИ:\nINTERNAL\nADMIN_STAFF
+note bottom of onec : ТЕГИ:\nCONFIDENTIAL\nFINANCE_DEPT
+note bottom of medcards : ТЕГИ:\nCONFIDENTIAL\nDOCTOR\nENCRYPT_REQUIRED
+
+@enduml

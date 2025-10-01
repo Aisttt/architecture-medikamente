@@ -1,0 +1,49 @@
+@startuml secure_lab_results_dfd
+!theme plain
+skinparam backgroundColor white
+skinparam defaultFontSize 10
+
+' Внешние сущности
+rectangle "ВНЕШНЯЯ\nЛАБОРАТОРИЯ\n✅ ПАРТНЁР" as lab #lightgreen
+
+' Процессы (защищённые)
+circle "ЗАЩИЩЁННАЯ\nПОЧТА\n✅ S/MIME" as secure_mail #lightgreen
+circle "ИНТЕГРАЦИОННЫЙ\nШЛЮЗ\n✅ ЗАЩИЩЁН" as gateway #lightgreen
+rectangle "ВРАЧ\n✅ ОК" as doctor #lightgreen
+
+' Системы безопасности
+rectangle "HSM КЛЮЧИ\n✅ АППАРАТНАЯ\nЗАЩИТА" as hsm #lightgreen
+rectangle "DATA LINEAGE\n✅ ОТСЛЕЖИВАНИЕ" as lineage #lightblue
+rectangle "BACKUP СИСТЕМА\n✅ РЕЗЕРВЫ" as backup #orange
+
+' Хранилища (защищённые)
+database "СИСТЕМА\nТЕГИРОВАНИЯ\nPHI_TESTS\n✅ ЗАЩИЩЕНО" as tagging #lightgreen
+database "ЗАЩИЩЁННОЕ\nХРАНИЛИЩЕ\nШифр.+подпись\n✅ ЗАЩИЩЕНО" as secure_storage #lightgreen
+
+' Аналитика
+rectangle "ML/ANALYTICS\nПЛАТФОРМА\n✅ ОБЕЗЛИЧЕНО" as analytics #yellow
+
+' Потоки данных
+lab --> secure_mail : "S/MIME\nшифрование"
+secure_mail --> gateway : "API с\nOAuth 2.0"
+hsm --> gateway : "Аппаратные\nключи"
+
+gateway --> tagging : "Автотегирование:\nPHI_TESTS"
+gateway --> secure_storage : "Шифрование +\nподпись"
+
+lineage --> gateway : "Трассировка"
+lineage --> secure_storage : "Отслеживание"
+backup --> secure_storage : "Резервное\nкопирование"
+
+secure_storage --> doctor : "RBAC:\nMedical_Staff"
+doctor --> analytics : "Обезличивание"
+
+' Улучшения безопасности
+note bottom of secure_mail : УЛУЧШЕНИЯ:\n✅ S/MIME шифрование передачи\n✅ OAuth 2.0 аутентификация API
+note bottom of hsm : ✅ HSM для критичных ключей
+note bottom of tagging : ✅ Автоматическое тегирование
+note bottom of lineage : ✅ Data Lineage отслеживание
+note bottom of backup : ✅ Резервное копирование
+note bottom of analytics : ✅ Обезличивание для аналитики
+
+@enduml

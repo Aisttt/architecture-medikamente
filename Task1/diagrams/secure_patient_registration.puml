@@ -1,0 +1,44 @@
+@startuml secure_patient_registration
+!theme plain
+skinparam backgroundColor white
+skinparam defaultFontSize 10
+
+' Внешние сущности
+rectangle "ПАЦИЕНТ\n+ Согласие ПД\n✅ ЗАЩИЩЕНО" as patient #lightgreen
+
+' Процессы (защищённые)
+circle "РЕСЕПШЕН\n+ MFA\n✅ ОК" as reception #lightgreen
+circle "СОЗДАНИЕ\nМЕДКАРТЫ\n✅ ОК" as create_record #lightgreen
+rectangle "ВРАЧ + MFA\n✅ ОК" as doctor #lightgreen
+
+' Системы безопасности
+rectangle "DLP СИСТЕМА\n✅ ЗАЩИТА" as dlp #orange
+rectangle "SIEM МОНИТОРИНГ\n✅ КОНТРОЛЬ" as siem #orange
+
+' Хранилища (защищённые)
+database "ЗАЩИЩЁННАЯ БД\nAES-256\n✅ ЗАЩИЩЕНО" as secure_db #lightgreen
+database "СИСТЕМА ТЕГИРОВАНИЯ\nPII_BASIC\n✅ ЗАЩИЩЕНО" as tagging #lightgreen
+database "ЗАЩИЩЁННОЕ ХРАНИЛИЩЕ\n+ Аудит + Версии\n✅ ЗАЩИЩЕНО" as secure_storage #lightgreen
+
+' Потоки данных
+patient --> reception : "Согласие на\nобработку ПД"
+dlp --> reception : "Контроль\nутечек"
+dlp --> doctor : "Контроль\nутечек"
+
+reception --> secure_db : "Шифрование\nAES-256"
+reception --> tagging : "Тегирование:\nPII_BASIC"
+
+secure_db --> doctor : "RBAC:\nDoctor_Only"
+doctor --> create_record : "Цифровая\nподпись"
+create_record --> secure_storage : "Зашифрованная\nмедкарта"
+
+siem --> secure_db : "Наблюдение"
+siem --> secure_storage : "Наблюдение"
+
+' Улучшения безопасности
+note bottom of reception : УЛУЧШЕНИЯ:\n✅ MFA для всех пользователей\n✅ Шифрование AES-256
+note bottom of tagging : ✅ Система тегирования данных
+note bottom of dlp : ✅ DLP предотвращение утечек
+note bottom of siem : ✅ SIEM мониторинг\n✅ Аудит всех операций
+
+@enduml

@@ -1,0 +1,39 @@
+@startuml inventory_management_dfd
+!theme plain
+skinparam backgroundColor white
+skinparam defaultFontSize 10
+
+' Внешние сущности
+rectangle "ПОСТАВЩИК\n(Контрагент)" as supplier #lightblue
+
+' Процессы
+circle "ПРИЕМ\nТОВАРА\n(Процесс 5.1)" as process1 #lightgreen
+circle "ИНТЕГРАЦИЯ\nС 1С\n(Процесс 5.2)" as process2 #lightgreen
+
+' Системы (защищённые)
+database "1С: ТОРГОВЛЯ\nИ СКЛАД\n✅ ОК" as store1c_trade #lightgreen
+rectangle "1С: БУХГАЛТЕРИЯ\n✅ ОК" as system1c_acc #lightgreen
+
+' Хранилища данных (уязвимые)
+database "ДУБЛИРОВАНИЕ ДАННЫХ\n(Excel)\n🔴 РИСК" as store_excel #pink
+database "ОБЩИЙ ДИСК\n🔴 РИСК" as store_disk #pink
+
+' Потоки данных
+supplier --> process1 : "Товары и документы\n(накладные, счета)"
+process1 --> store1c_trade : "Документы поставки"
+process1 --> store_excel : "Дублирование\nв Excel"
+
+store1c_trade --> process2 : "Данные ТМЦ"
+store_excel --> store_disk : "Коммерческие\nданные"
+
+process2 --> system1c_acc : "Интеграция\nданных"
+
+' Нумерация хранилищ
+note top of store1c_trade : D7
+note top of store_excel : D6
+
+' Проблемы безопасности
+note bottom of store_excel : ПРОБЛЕМА:\nКоммерческие данные\nдублируются в Excel
+note bottom of store_disk : ПРОБЛЕМА:\nИнформация о поставщиках\nне защищена
+
+@enduml

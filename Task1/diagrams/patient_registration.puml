@@ -1,0 +1,36 @@
+@startuml patient_registration_dfd
+!theme plain
+skinparam backgroundColor white
+skinparam defaultFontSize 10
+
+' Внешние сущности
+rectangle "ПАЦИЕНТ\n(Внешняя сущность)" as patient #lightblue
+
+' Процессы  
+circle "ЗАПИСЬ\nПАЦИЕНТА\n(Процесс 1.1)" as process1 #lightgreen
+rectangle "МЕДИЦИНСКИЙ\nСПЕЦИАЛИСТ\n(Процесс 1.2)" as doctor #lightgreen
+circle "СОЗДАНИЕ\nМЕДКАРТЫ\n(Процесс 1.3)" as process3 #lightgreen
+
+' Хранилища данных (уязвимые)
+database "ЖУРНАЛ ЗАПИСЕЙ\n(Excel)\n🔴 РИСК" as store1 #pink
+database "АНКЕТЫ ПАЦИЕНТОВ\n(Файлы)\n🔴 РИСК" as store2 #pink
+database "МЕДИЦИНСКИЕ КАРТЫ\n(PDF/JPG)\n🔴 КРИТИЧНО" as store3 #red
+
+' Потоки данных
+patient --> process1 : "Данные пациента\n(ФИО, телефон, жалобы)"
+process1 --> store1 : "Персональные\nданные"
+process1 --> store2 : "Персональные\nданные"  
+process1 --> doctor : "Персональные\nданные"
+
+store1 --> doctor : "Данные записи"
+store2 --> doctor : "Анкетные данные"
+
+doctor --> process3 : "Медицинские\nданные"
+process3 --> store3 : "Медицинская\nкарта"
+
+' Нумерация хранилищ
+note top of store1 : D1
+note top of store2 : D2  
+note top of store3 : D3
+
+@enduml
